@@ -56,17 +56,22 @@ class sudoku():
             self.canvas.create_line(0, (i + 1) * size_of_board / 3, size_of_board, (i + 1) * size_of_board / 3)
 
 def init_solve(board):
-    print(board)
+    #print(board)
     has_changed = True
-    for i in range(0,9):
-        for j in range(0,9):
-            if( board[i][j] == 0):
-                #print("solving cell vale at",board[i][j],"at [",i,",",j,"]") 
-                if(solveCell(board, i,j)): has_changed=True
+    while(has_changed):
+        has_changed= False
+        for col in range(0,9):
+            for row in range(0,9):
+                if( board[row][col] == 0):
+                    #print("solving cell vale at",board[row][col],"at [",row,",",col,"]") 
+                    if(solveCell(board, row,col)): has_changed=True
+        
+        if not has_changed: print("and Alexander wept")
+        
     print(init_board)
     print(board)
-    
     if(np.array_equal(init_board, board)): print("fuck")
+    if(np.array_equal(board, solved_board)): print("for there were no more worlds left to conquer")
     print(solved_board)
 
 def checkCell(board, row, col):
@@ -84,20 +89,20 @@ def solveCell(board, row, col):
     #if(checkCell(row, col)): return False
     band = checkBand(board, row)
     if(size(band) == 1):
-        print("Solved!", band[0],"at [",row,",",col,"]")
-        print("solved band")
+        #print("Solved!", band[0],"at [",row,",",col,"]")
+        #print("solved band")
         board[row][col] = band[0]
         return True
     stack = checkStack(board, col)
     if(size(stack) == 1):
-        print("Solved!", stack[0], "at [",row,",",col,"]")
-        print("solved stack")
+        #print("Solved!", stack[0], "at [",row,",",col,"]")
+        #print("solved stack")
         board[row][col] = stack[0]
         return True
     square = checkSquare(findSquare(board, row,col))
     if(size(square) == 1):
-        print("Solved: ", square[0], "at [",row,",",col,"]")
-        print("solved square")
+        #print("Solved: ", square[0], "at [",row,",",col,"]")
+        #print("solved square")
         board[row][col] = square[0]
         return True
 
@@ -105,18 +110,21 @@ def solveCell(board, row, col):
     all_possible = [x for x in band if x in band and x in stack and x in square]
     #print(all_possible)
     if(size(all_possible) == 1):
-        print("Solved using reduction", all_possible[0], "at [",row,",",col,"]")
+        #print("Solved using reduction", all_possible[0], "at [",row,",",col,"]")
         board[row][col] = all_possible[0]
         return True
+    elif(size(all_possible) == 0):
+        print("ERROR: NO POSSIBLE: ", all_possible, "at [",row,",",col,"]")
+        print(board)
     else:
-        print("All Possible ", all_possible, "at [",row,",",col,"]")
         return False
 
 
 def checkStack(board, col):
     column = board[:,col]
     possible = []
-    for i in range(0,9):
+    #print("stack", col)
+    for i in range(1,10):
         if(checkArrayVal(column, i)):
             #print("Appending  ",i)
             possible.append(i)
@@ -127,7 +135,7 @@ def checkBand(board, row):
     #print("Band:")
     #print(ro)
     possible = []
-    for i in range(0,9):
+    for i in range(1,10):
         if(checkArrayVal(ro, i)):
             #print("Appending  ",i)
             possible.append(i)
@@ -146,7 +154,7 @@ def findSquare(board, row, col):
     row = math.floor((row)/3)
     col = math.floor((col)/3)
     if(row == 1): row = 3
-    elif(row == 2): row = 4
+    elif(row == 2): row = 6
     else: row = 0
     if(col == 1): col = 3
     elif(col == 2): col = 6
@@ -158,7 +166,7 @@ def findSquare(board, row, col):
 def checkSquare(square):
     #print(square)
     possible = []
-    for i in range(0,9):
+    for i in range(1,10):
         if(checkSquareVal(square, i)):
             #print("Appending  ",i)
             possible.append(i)
