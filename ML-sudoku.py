@@ -1,33 +1,14 @@
 import numpy as np
+from numpy.lib.function_base import append
+import pandas as pd
 from tkinter import *
 import math
+import time 
 
 from numpy.core.fromnumeric import size
+from pandas.core.arrays.sparse import dtype
 
 size_of_board = 600
-start_board = np.array( [ [5, 3, 0, 6, 7, 0, 0, 1, 0,],
-                    [6, 0, 0, 1, 9, 5, 0, 0, 0,],
-                    [0, 9, 8, 0, 0, 0, 0, 6, 0,],
-                    [8, 0, 9, 0, 6, 0, 4, 0, 3,],
-                    [4, 0, 0, 8, 0, 3, 0, 0, 1,],
-                    [7, 0, 3, 0, 2, 0, 0, 0, 6,],
-                    [0, 6, 1, 0, 0, 7, 2, 8, 0,],
-                    [0, 0, 0, 4, 1, 9, 0, 0, 5,],
-                    [0, 0, 0, 0, 8, 0, 0, 7, 9,],
-                    ] )
-init_board = start_board
-
-solved_board = np.array( [ 
-                    [5, 3, 4, 6, 7, 8, 9, 1, 2,],
-                    [6, 7, 2, 1, 9, 5, 3, 4, 8,],
-                    [1, 9, 8, 3, 4, 2, 5, 6, 7,],
-                    [8, 5, 9, 7, 6, 1, 4, 2, 3,],
-                    [4, 2, 6, 8, 5, 3, 7, 9, 1,],
-                    [7, 1, 3, 9, 2, 4, 8, 5, 6,],
-                    [9, 6, 1, 5, 3, 7, 2, 8, 4,],
-                    [2, 8, 7, 4, 1, 9, 6, 3, 5,],
-                    [3, 4, 5, 2, 8, 6, 1, 7, 9,],
-                    ] )
 """
 initialization of sudoku class based on Tic-Toc-Toe game from 
 
@@ -55,7 +36,26 @@ class sudoku():
         for i in range(9):
             self.canvas.create_line(0, (i + 1) * size_of_board / 3, size_of_board, (i + 1) * size_of_board / 3)
 
-def init_solve(board):
+
+def convert_df(row):
+    #print(row)
+    quiz = row[0]
+    ans = row[1]
+    board = np.zeros((9,9), dtype=int)
+    solved_board = np.zeros((9,9), dtype=int)
+
+    for i in range(0,9):
+        for j in range (0,9):
+            board[i][j] = quiz[9*i + j]
+
+    for i in range(0,9):
+        for j in range (0,9):
+            solved_board[i][j] = ans[9*i + j]
+    
+    return board, solved_board
+
+def init_solve(board, solved_board):
+    init_board = np.copy(board)
     #print(board)
     has_changed = True
     while(has_changed):
@@ -65,14 +65,17 @@ def init_solve(board):
                 if( board[row][col] == 0):
                     #print("solving cell vale at",board[row][col],"at [",row,",",col,"]") 
                     if(solveCell(board, row,col)): has_changed=True
+            
+    #print(init_board)
+    #print(board)
+    if(np.array_equal(init_board, board)): 
         
-        if not has_changed: print("and Alexander wept")
+        return False
+    if(np.array_equal(board, solved_board)): 
         
-    print(init_board)
-    print(board)
-    if(np.array_equal(init_board, board)): print("fuck")
-    if(np.array_equal(board, solved_board)): print("for there were no more worlds left to conquer")
-    print(solved_board)
+        return True
+    #print(board)
+    #print(solved_board)
 
 def checkCell(board, row, col):
     if(board[row][col] != 0):
@@ -181,41 +184,21 @@ def checkSquareVal(square, val):
     return True
                 
 
-#print(board)
-#print("\n")
-#array_board = np.zeros((9,3,3))
-#print(array_board)
-#array_board[0] = board[:3, :3]
-#print(array_board)
-#column = board[:,3]
-#print("column 1" ,column[0])
+df = pd.read_csv("C:\\Users\\lou\\Desktop\\Projects\\ML-Sudoku\\sudoku.csv")
 
-#poss_band = checkBand(2)
-#print(poss_band)
+init_time = time.perf_counter()
+count_pass = 0
+boards = 100000
+for i in range(boards):
+    board , solved_board = convert_df(df.iloc[i, :])
+    if(init_solve(board, solved_board)) : count_pass+=1
+    else: print("Got Wrong ", i)
 
-#poss_stack = checkStack(1)
-#print(poss_stack)
+done_time = time.perf_counter()
+time_taken = done_time-init_time
 
-#poss_square=checkSquare(array_board[0], 1)
+print("\nAnd Alexander wept\n")
+print("Solved: ",count_pass, "/", boards, " in ", time_taken, " seconds")
+if count_pass == boards: print("\nFor there were no more worlds left to conquer\n")
+else: print("\nd'oh\n")
 
-#square = findSquare(2, 1)
-#print(square)
-#poss_square = checkSquare(square)
-#print(poss_square)
-
-#checkCell(1,5)
-#solveCell(1,5)
-#print(board[:,1])
-board = np.array( [ [5, 3, 0, 6, 7, 0, 0, 1, 0,],
-                    [6, 0, 0, 1, 9, 5, 0, 0, 0,],
-                    [0, 9, 8, 0, 0, 0, 0, 6, 0,],
-                    [8, 0, 9, 0, 6, 0, 4, 0, 3,],
-                    [4, 0, 0, 8, 0, 3, 0, 0, 1,],
-                    [7, 0, 3, 0, 2, 0, 0, 0, 6,],
-                    [0, 6, 1, 0, 0, 7, 2, 8, 0,],
-                    [0, 0, 0, 4, 1, 9, 0, 0, 5,],
-                    [0, 0, 0, 0, 8, 0, 0, 7, 9,],
-                    ] )
-init_solve(board)
-#for i in range(0,9):
-#    print(i)
