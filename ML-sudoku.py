@@ -4,6 +4,7 @@ import pandas as pd
 from tkinter import *
 import math
 import time 
+import os
 
 from numpy.core.fromnumeric import size
 from pandas.core.arrays.sparse import dtype
@@ -183,12 +184,12 @@ def checkSquareVal(square, val):
                 return False
     return True
                 
-
-df = pd.read_csv("C:\\Users\\lou\\Desktop\\Projects\\ML-Sudoku\\sudoku.csv")
+filepath = os.path.dirname(__file__)
+df = pd.read_csv(os.path.join(filepath,"sudoku.csv"))
 
 init_time = time.perf_counter()
 count_pass = 0
-boards = 100000
+boards = 10000
 for i in range(boards):
     board , solved_board = convert_df(df.iloc[i, :])
     if(init_solve(board, solved_board)) : count_pass+=1
